@@ -29,6 +29,31 @@ namespace MotoComparisonAdmin.Services
                 }).ToListAsync();
         }
 
+        public async Task<PaginatedList<ManufacturerViewModel>> GetAllAsync(string searchTerm, int pageIndex, int pageSize)
+        {
+            var query = _context.Manufacturers.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(m => m.Name.Contains(searchTerm));
+            }
+
+            var count = await query.CountAsync();
+            var items = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            //convert ManufacturerContextModel to ManufacturerViewModel
+            var viewItems = items.Select(m => new ManufacturerViewModel
+            {
+                Id = m.Id,
+                Name = m.Name
+            }).ToList();
+
+            return new PaginatedList<ManufacturerViewModel>(viewItems, count, pageIndex, pageSize);
+        }
+
         public async Task<ManufacturerViewModel> GetByIdAsync(int id)
         {
             var manufacturer = await _context.Manufacturers.FindAsync(id);

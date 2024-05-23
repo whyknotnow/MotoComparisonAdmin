@@ -1,38 +1,47 @@
-﻿@model IEnumerable<MotoComparisonAdmin.ViewModels.ModelViewModel>
+﻿@model PaginatedList<MotoComparisonAdmin.ViewModels.ModelViewModel>
+
+@{
+    ViewData["Title"] = "Models";
+}
 
 <h2>Models</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<form method="get" asp-action="Index">
+    <input type="text" name="searchTerm" value="@ViewData["SearchTerm"]" placeholder="Search..." />
+    <input type="submit" value="Search" />
+</form>
 
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ManufacturerName)
-            </th>
+            <th>Name</th>
+            <th>Manufacturer</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ManufacturerName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.ManufacturerName)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<div class="pagination">
+    @if (Model.HasPreviousPage)
+    {
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex - 1)" asp-route-searchTerm="@ViewData["SearchTerm"]">Previous</a>
+    }
+    @if (Model.HasNextPage)
+    {
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex + 1)" asp-route-searchTerm="@ViewData["SearchTerm"]">Next</a>
+    }
+</div>

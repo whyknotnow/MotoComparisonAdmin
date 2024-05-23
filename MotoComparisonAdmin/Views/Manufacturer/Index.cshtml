@@ -1,27 +1,28 @@
-﻿@model IEnumerable<MotoComparisonAdmin.ViewModels.ManufacturerViewModel>
+﻿@model PaginatedList<MotoComparisonAdmin.ViewModels.ManufacturerViewModel>
+
+@{
+    ViewData["Title"] = "Manufacturers";
+}
 
 <h2>Manufacturers</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<form method="get" asp-action="Index">
+    <input type="text" name="searchTerm" value="@ViewData["SearchTerm"]" placeholder="Search..." />
+    <input type="submit" value="Search" />
+</form>
 
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
+            <th>Name</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
@@ -31,3 +32,14 @@
         }
     </tbody>
 </table>
+
+<div class="pagination">
+    @if (Model.HasPreviousPage)
+    {
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex - 1)" asp-route-searchTerm="@ViewData["SearchTerm"]">Previous</a>
+    }
+    @if (Model.HasNextPage)
+    {
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex + 1)" asp-route-searchTerm="@ViewData["SearchTerm"]">Next</a>
+    }
+</div>

@@ -65,9 +65,11 @@ public class ManufacturerController : Controller
 
     // MVC Actions
     [HttpGet("/Manufacturer")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string searchTerm = "", int pageIndex = 1, int pageSize = 10)
     {
-        return View(await _service.GetAllAsync());
+        var manufacturers = await _service.GetAllAsync(searchTerm, pageIndex, pageSize);
+        ViewData["SearchTerm"] = searchTerm;
+        return View(manufacturers);
     }
 
     [HttpGet("/Manufacturer/Create")]

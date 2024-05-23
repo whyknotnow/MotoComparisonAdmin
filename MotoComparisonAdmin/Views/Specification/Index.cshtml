@@ -1,51 +1,68 @@
-﻿@model IEnumerable<MotoComparisonAdmin.ViewModels.SpecificationViewModel>
+﻿@model PaginatedList<MotoComparisonAdmin.ViewModels.SpecificationGroupedViewModel>
+
+@{
+    ViewData["Title"] = "Specifications";
+}
 
 <h2>Specifications</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<form method="get" asp-action="Index">
+    <input type="text" name="searchTerm" value="@ViewData["SearchTerm"]" placeholder="Search by Model Name..." />
+    <input type="submit" value="Search" />
+</form>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Key)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Value)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ModelName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ManufacturerName)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+@foreach (var group in Model.Items)
+{
+    <h3>
+        <a href="javascript:void(0);" onclick="toggleSpecifications(@group.ModelId)">
+            @group.ModelName (@group.ManufacturerName)
+        </a>
+    </h3>
+    <table class="table" id="specifications-@group.ModelId" style="display:none;">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Key)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Value)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ModelName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ManufacturerName)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
+                <th>Key</th>
+                <th>Value</th>
+                <th></th>
             </tr>
+        </thead>
+        <tbody>
+            @foreach (var spec in group.Specifications)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => spec.Key)</td>
+                    <td>@Html.DisplayFor(modelItem => spec.Value)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@spec.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@spec.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@spec.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="pagination">
+    @if (Model.HasPreviousPage)
+    {
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex - 1)" asp-route-searchTerm="@ViewData["SearchTerm"]">Previous</a>
+    }
+    @if (Model.HasNextPage)
+    {
+        <a asp-action="Index" asp-route-pageIndex="@(Model.PageIndex + 1)" asp-route-searchTerm="@ViewData["SearchTerm"]">Next</a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function toggleSpecifications(modelId) {
+            var table = document.getElementById('specifications-' + modelId);
+            if (table.style.display === 'none') {
+                table.style.display = '';
+            } else {
+                table.style.display = 'none';
+            }
         }
-    </tbody>
-</table>
+    </script>
+}
