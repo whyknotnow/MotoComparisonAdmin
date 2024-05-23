@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MotoComparisonAdmin.Contexts;
 using MotoComparisonAdmin.Services;
-
+using Microsoft.OpenApi.Models;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,7 @@ builder.Services.AddDbContext<MotorcycleContext>(options =>
 builder.Services.AddScoped<ManufacturerService>();
 builder.Services.AddScoped<ModelService>();
 builder.Services.AddScoped<SpecificationService>();
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -81,5 +83,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+app.MapControllers(); // Ensure this is added to map the API controllers
 
 app.Run();

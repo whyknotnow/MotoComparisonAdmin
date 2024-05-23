@@ -1,22 +1,80 @@
 ﻿namespace MotoComparisonAdmin.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Rendering;
 
     using MotoComparisonAdmin.Contexts;
     using MotoComparisonAdmin.Services;
+    using MotoComparisonAdmin.ViewModels;
 
     using System.Threading.Tasks;
 
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SpecController : ControllerBase
+    public class SpecificationController : Controller
     {
         private readonly SpecificationService _service;
+        private readonly ManufacturerService _manufacturerService;
+        private readonly ModelService _modelService;
 
-        public SpecController(SpecificationService service)
+        public SpecificationController(SpecificationService service, ManufacturerService manufacturerService, ModelService modelService)
         {
             _service = service;
+            _manufacturerService = manufacturerService;
+            _modelService = modelService;
         }
+
+        public async Task<IActionResult> Index()
+        {
+            return View(await _service.GetAllAsync());
+        }
+
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.ManufacturerId = new SelectList(await _manufacturerService.GetAllAsync(), "Id", "Name");
+            ViewBag.ModelId = new SelectList(await _modelService.GetAllAsync(), "Id", "Name");
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(SpecificationViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                await _service.AddAsync(model);
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.ManufacturerId = new SelectList(await _manufacturerService.GetAllAsync(), "Id", "Name");
+            ViewBag.ModelId = new SelectList(await _modelService.GetAllAsync(), "Id", "Name");
+            return View(model);
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var model = await _service.GetByIdAsync(id);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            ViewBag.ModelId = new SelectList(await _modelService.GetAllAsync(), "Id", "Name", model.ModelId);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, SpecificationViewModel model)
+        {
+            if (id != model.Id)
+            {
+                return BadRequest();
+            }
+            if (ModelState.IsValid)
+            {
+                await _service.UpdateAsync(model);
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.ModelId = new SelectList(await _manufacturerService.GetAllAsync(), "Id", "Name", model.ModelId);
+            return View(model);
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -35,8 +93,10 @@
             return Ok(spec);
         }
 
+
+
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] SpecificationContextModel spec)
+        public async Task<IActionResult> Add([FromBody] SpecificationViewModel spec)
         {
             if (spec == null)
             {
@@ -47,7 +107,7 @@
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] SpecificationContextModel spec)
+        public async Task<IActionResult> Update(int id, [FromBody] SpecificationViewModel spec)
         {
             if (id != spec.Id)
             {
@@ -62,6 +122,17 @@
         {
             await _service.DeleteAsync(id);
             return NoContent();
+        }
+
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var model = await _service.GetByIdAsync(id);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            return View(model);
         }
     }
 

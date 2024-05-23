@@ -3,68 +3,97 @@
 namespace MotoComparisonAdmin.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-
-    using MotoComparisonAdmin.Contexts;
     using MotoComparisonAdmin.Services;
-
-
+    using MotoComparisonAdmin.ViewModels;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Mvc.Rendering;
 
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ModelController : ControllerBase
+    public class ModelController : Controller
     {
         private readonly ModelService _service;
+        private readonly ManufacturerService _manufacturerService;
 
-        public ModelController(ModelService service)
+        public ModelController(ModelService service, ManufacturerService manufacturerService)
         {
             _service = service;
+            _manufacturerService = manufacturerService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> Index()
         {
-            return Ok(await _service.GetAllAsync());
+            return View(await _service.GetAllAsync());
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.ManufacturerId = new SelectList(await _manufacturerService.GetAllAsync(), "Id", "Name");
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(ModelViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                await _service.AddAsync(model);
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.ManufacturerId = new SelectList(await _manufacturerService.GetAllAsync(), "Id", "Name", model.ManufacturerId);
+            return View(model);
+        }
+
+        public async Task<IActionResult> Edit(int id)
         {
             var model = await _service.GetByIdAsync(id);
             if (model == null)
             {
                 return NotFound();
             }
-            return Ok(model);
+            ViewBag.ManufacturerId = new SelectList(await _manufacturerService.GetAllAsync(), "Id", "Name", model.ManufacturerId);
+            return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] ModelContextModel model)
-        {
-            if (model == null)
-            {
-                return BadRequest();
-            }
-            await _service.AddAsync(model);
-            return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ModelContextModel model)
+        public async Task<IActionResult> Edit(int id, ModelViewModel model)
         {
             if (id != model.Id)
             {
                 return BadRequest();
             }
-            await _service.UpdateAsync(model);
-            return NoContent();
+            if (ModelState.IsValid)
+            {
+                await _service.UpdateAsync(model);
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.ManufacturerId = new SelectList(await _manufacturerService.GetAllAsync(), "Id", "Name", model.ManufacturerId);
+            return View(model);
         }
 
-        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var model = await _service.GetByIdAsync(id);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            return View(model);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
             await _service.DeleteAsync(id);
-            return NoContent();
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var model = await _service.GetByIdAsync(id);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            return View(model);
         }
     }
 

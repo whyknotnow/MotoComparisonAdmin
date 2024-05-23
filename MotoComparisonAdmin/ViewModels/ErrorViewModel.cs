@@ -1,4 +1,4 @@
-namespace MotoComparisonAdmin.Models
+namespace MotoComparisonAdmin.ViewModels
 {
     public class ErrorViewModel
     {

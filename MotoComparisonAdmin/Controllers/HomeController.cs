@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 using Microsoft.AspNetCore.Mvc;
 
-using MotoComparisonAdmin.Models;
+using MotoComparisonAdmin.ViewModels;
 
 namespace MotoComparisonAdmin.Controllers
 {
